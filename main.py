@@ -3,7 +3,7 @@ import sys
 import os
 import subprocess
 
-from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit
+from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QPlainTextEdit
 from PySide6.QtCore import QFile, Slot
 from PySide6.QtUiTools import QUiLoader
 
@@ -26,7 +26,8 @@ class Implement(Base):
     def __init__(self):
         super().__init__()
         self.domain_in = self.ui.findChild(QLineEdit, "domain_in")
-
+        self.text_box = self.ui.findChild(QPlainTextEdit, "log_out")
+        print(self.text_box)
         btn = self.ui.findChild(QPushButton, 'rs_button')
         btn.clicked.connect(self.run_script)
 
@@ -36,14 +37,15 @@ class Implement(Base):
     def run_script(self):
         text_value = self.domain_in.text()
         print(type(text_value))
-        out_file = open("output",'')
+        out_file = open("output", 'w')
         script_path = "/home/creater3494/Projects/Major project/tracescripts/trace.sh"
         rc = subprocess.run(
             [script_path, text_value],
-            capture_output=True,
-            stdout= out_file
+            stdout= out_file,
+            stderr=subprocess.PIPE
         )
-        print(rc)
+        out_file.close()
+        self.show_output_box()
         print(rc.stdout.decode("utf-8"))
 #        print("script test")
 
@@ -51,7 +53,8 @@ class Implement(Base):
         pass
 
     def show_output_box(self):
-        pass
+        out_file = open("output").read()
+        self.text_box.insertPlainText(out_file)
 
     def read_script_output(self):
         pass
