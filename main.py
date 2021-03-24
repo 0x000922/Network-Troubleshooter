@@ -1,17 +1,22 @@
-# This Python file uses the following encoding: utf-8
 import sys
 import os
 import subprocess
 
-from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QPlainTextEdit
-from PySide6.QtCore import QFile, Slot
+from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QPlainTextEdit, QGraphicsView, QVBoxLayout
+from PySide6.QtCore import QFile, QThread, Slot, Qt
 from PySide6.QtUiTools import QUiLoader
+from PySide6.QtSvgWidgets import QSvgWidget
 
 
 class Base(QWidget):
     def __init__(self):
         super(Base, self).__init__()
         self.load_ui()
+        # self.thread = Worker()
+        self.domain_in = self.ui.findChild(QLineEdit, "domain_in")
+        self.text_box = self.ui.findChild(QPlainTextEdit, "log_out")
+        self.btn = self.ui.findChild(QPushButton, 'rs_button')
+        self.graph_btn = self.ui.findChild(QPushButton, 'graph_btn')
 
     def load_ui(self):
         loader = QUiLoader()
@@ -21,48 +26,56 @@ class Base(QWidget):
         self.ui = loader.load(ui_file, self)
         ui_file.close()
 
+class GraphWindow(QWidget):
+    def __init__(self, path):
+        super().__init__()
+        layout = QVBoxLayout()
+        self.svg_wid = QSvgWidget(self)
+        self.svg_wid.load(path)
+#        self.svg_wid.show()
+        layout.addWidget(self.svg_wid)
+        self.setLayout(layout)
+
 
 class Implement(Base):
     def __init__(self):
         super().__init__()
-        self.domain_in = self.ui.findChild(QLineEdit, "domain_in")
-        self.text_box = self.ui.findChild(QPlainTextEdit, "log_out")
         print(self.text_box)
-        btn = self.ui.findChild(QPushButton, 'rs_button')
-        btn.clicked.connect(self.run_script)
+        self.btn.clicked.connect(self.run_script)
+        self.graph_btn.clicked.connect(self.graph_disp)
 
-    def show_ui_object(self):
-        print(self.ui)
-
+    @Slot()
     def run_script(self):
         text_value = self.domain_in.text()
         print(type(text_value))
         out_file = open("output", 'w')
-        script_path = "/home/creater3494/Projects/Major project/tracescripts/trace.sh"
+        script_path = "/home/creater3494/Projects/Major project/tracescripts/test2.sh"
         rc = subprocess.run(
             [script_path, text_value],
-            stdout= out_file,
+            stdout=out_file,
             stderr=subprocess.PIPE
         )
         out_file.close()
         self.show_output_box()
-        print(rc.stdout.decode("utf-8"))
-#        print("script test")
 
     def use_run_script(self):
         pass
 
+    @Slot()
     def show_output_box(self):
         out_file = open("output").read()
         self.text_box.insertPlainText(out_file)
 
-    def read_script_output(self):
-        pass
+    def graph_disp(self):
+        self.w = GraphWindow("test_final_graph.svg")
+        self.w.show()
+
+
 
 
 if __name__ == "__main__":
     app = QApplication([])
     widget = Implement()
     widget.show()
-    widget.show_ui_object()
+#    widget.show_ui_object()
     sys.exit(app.exec_())
