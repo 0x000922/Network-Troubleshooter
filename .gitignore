@@ -71,3 +71,11 @@ Thumbs.db
 *.dll
 *.exe
 
+# generated output files using trace.sh
+
+res.*
+
+# from graphviz genrator file
+
+output
+*.svg
