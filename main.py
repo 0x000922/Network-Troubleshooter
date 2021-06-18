@@ -1,8 +1,9 @@
 import sys
 import os
 import subprocess
+import graphviz_gen
 
-from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QPlainTextEdit, QGraphicsView, QVBoxLayout
+from PySide6.QtWidgets import QApplication, QWidget, QPushButton, QLineEdit, QPlainTextEdit, QVBoxLayout
 from PySide6.QtCore import QFile, QThread, Slot, Qt
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtSvgWidgets import QSvgWidget
@@ -26,6 +27,7 @@ class Base(QWidget):
         self.ui = loader.load(ui_file, self)
         ui_file.close()
 
+
 class GraphWindow(QWidget):
     def __init__(self, path):
         super().__init__()
@@ -40,6 +42,7 @@ class GraphWindow(QWidget):
 class Implement(Base):
     def __init__(self):
         super().__init__()
+        self.w = None
         print(self.text_box)
         self.btn.clicked.connect(self.run_script)
         self.graph_btn.clicked.connect(self.graph_disp)
@@ -49,7 +52,7 @@ class Implement(Base):
         text_value = self.domain_in.text()
         print(type(text_value))
         out_file = open("output", 'w')
-        script_path = "/home/creater3494/Projects/Major project/tracescripts/test2.sh"
+        script_path = "{insert your path here for the bash script }"
         rc = subprocess.run(
             [script_path, text_value],
             stdout=out_file,
@@ -58,19 +61,19 @@ class Implement(Base):
         out_file.close()
         self.show_output_box()
 
-    def use_run_script(self):
-        pass
-
     @Slot()
     def show_output_box(self):
         out_file = open("output").read()
+        print(out_file)
+        self.text_box.clear()
         self.text_box.insertPlainText(out_file)
 
     def graph_disp(self):
-        self.w = GraphWindow("test_final_graph.svg")
+        graphviz_gen.gengraph(self.domain_in.text())
+#        if self.w is None:
+        print(self.domain_in.text())
+        self.w = GraphWindow("final_graph"+self.domain_in.text()+".svg")
         self.w.show()
-
-
 
 
 if __name__ == "__main__":
